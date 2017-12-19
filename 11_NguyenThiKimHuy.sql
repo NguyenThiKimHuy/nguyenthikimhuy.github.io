@@ -1,0 +1,229 @@
+--1. 
+CREATE TABLE PHONGBAN
+(
+    MAPH CHAR(5) NOT NULL,
+    TENPH NVARCHAR2(50),
+    DIADIEM NVARCHAR2(50),
+    PRIMARY KEY(MAPH)
+)
+CREATE TABLE NHANVIEN
+(
+    MANV CHAR(6) NOT NULL,
+    HOTEN NVARCHAR2(50),
+    NGAYSINH DATE,
+    PHAI NCHAR(3),
+    DIACHI NVARCHAR2(50),
+    LUONG FLOAT,
+    MANQL CHAR(6),
+    MAPH CHAR(5),
+    PRIMARY KEY(MANV),
+    FOREIGN KEY(MANQL) REFERENCES NHANVIEN(MANV),
+    FOREIGN KEY(MAPH ) REFERENCES PHONGBAN(MAPH )
+)
+CREATE TABLE DEAN
+(
+    MADA CHAR(5) NOT NULL,
+    TENDA NVARCHAR2(50),
+    DIADIEMDA NVARCHAR2(50),
+    NGAYBD DATE,
+    PRIMARY KEY(MADA)
+)
+
+SELECT * FROM phongban;
+CREATE TABLE PHANCONG
+(
+    MANV CHAR(6) NOT NULL,
+    MADA CHAR(5) NOT NULL,
+    THOIGIAN FLOAT,
+    PRIMARY KEY(MANV,MADA),
+    FOREIGN KEY(MANV) REFERENCES NHANVIEN(MANV),
+    FOREIGN KEY(MADA ) REFERENCES DEAN(MADA)
+)
+CREATE TABLE THANNHAN
+(
+    MANV CHAR(6) NOT NULL,
+    TENTN NVARCHAR2(50),
+    PHAI NCHAR(3),
+    NGAYSINH DATE,
+    QUANHE NVARCHAR2(10),
+    PRIMARY KEY(MANV),
+    FOREIGN KEY(MANV) REFERENCES NHANVIEN(MANV)
+)
+--2.
+INSERT INTO PHONGBAN VALUES('PH01',N'To Chuc',N'Quan Tan Phu');
+INSERT INTO PHONGBAN VALUES('PH02',N'Dao Tao',N'Quan 5');
+INSERT INTO PHONGBAN VALUES('PH03',N'Ke Toan',N'Quan 7');
+INSERT INTO PHONGBAN VALUES('PH04',N'Kinh Doanh',N'Quan Binh Chanh');
+INSERT INTO PHONGBAN VALUES('PH05',N'Ki Thuat',N'Quan7');
+INSERT INTO NHANVIEN VALUES('NV0001',N'Nguyen Vân',NULL,N'Nu',N'Long An',4500000,NULL,'PH01');
+INSERT INTO NHANVIEN VALUES('NV0002',N'Do Xuan Thuy',NULL,'Nam',N'Ha Tinh',12300000,NULL,'PH04');
+INSERT INTO NHANVIEN VALUES('NV0003',N'Pham Thi Mai',NULL,N'Nu',N'Binh Duong',6000000,NULL,'PH03');
+INSERT INTO NHANVIEN VALUES('NV0004',N'Nguyen Nhu Quynh',NULL,N'Nu',N'Tay Ninh',7000000,NULL,'PH05');
+INSERT INTO NHANVIEN VALUES('NV0005',N'Nguyen Van Minh',NULL,'Nam','TPHCM',8750000,NULL,'PH02');
+INSERT INTO NHANVIEN VALUES('NV0006',N'Nguyen Thi Linh',NULL,N'Nu','TPHCM',4100000,NULL,'PH02');
+INSERT INTO DEAN VALUES('DA01',N'Xu ly nuoc sach',N'Quan 3',TO_DATE('23/05/2017','DD/MM/YYYY'));
+select * from nhanvien; 
+UPDATE NHANVIEN
+SET HOTEN='Do Xuan Thuy'
+WHERE MANV='NV0002';
+INSERT INTO DEAN VALUES('DA02',N'Xu ly rac',N'Quan 4',TO_DATE('11/06/2017','DD/MM/YYYY'));
+INSERT INTO DEAN VALUES('DA03',N'Xay Dung Cong Trinh',N'Qu?n 1',TO_DATE('12/06/2017','DD/MM/YYYY'));
+INSERT INTO DEAN VALUES('DA04',N'kiem tra loi',N'Quan 1',TO_DATE('21/07/2017','DD/MM/YYYY'));
+INSERT INTO DEAN VALUES('DA05',N'Nang cap duong xa',N'Quan 1',TO_DATE('9/08/2017','DD/MM/YYYY'));
+INSERT INTO PHANCONG VALUES('NV0001','DA03',6);
+INSERT INTO PHANCONG VALUES('NV0002','DA01',3);
+INSERT INTO PHANCONG VALUES('NV0003','DA05',3);
+INSERT INTO PHANCONG VALUES('NV0004','DA02',7);
+INSERT INTO PHANCONG VALUES('NV0005','DA05',6);
+INSERT INTO PHANCONG VALUES('NV0006','DA03',5);
+INSERT INTO THANNHAN VALUES('NV0001',N'Pham Van Quoc','Nam',TO_DATE('19/12/2002','DD/MM/YYYY'),N'Em trai');
+INSERT INTO THANNHAN VALUES('NV0002',N'Le Thao Nguyen',N'N?',TO_DATE('9/08/1969','DD/MM/YYYY'),N'Mo');
+INSERT INTO THANNHAN VALUES('NV0003',N'Tran Thao ',N'Nu',TO_DATE('21/7/1971','DD/MM/YYYY'),N'Chi');
+INSERT INTO THANNHAN VALUES('NV0004',N'Nguyen Nhu My',N'Nu',TO_DATE('10/11/1991','DD/MM/YYYY'),N'Me');
+INSERT INTO THANNHAN VALUES('NV0005',N'Pham Van Son','Nam',TO_DATE('1/5/1987','DD/MM/YYYY'),N'Anh trai');
+UPDATE THANNHAN
+SET QUANHE='Me'
+WHERE MANV='NV0002';
+SELECT * FROM THANNHAN; 
+--3. 
+SET SERVEROUTPUT ON;
+DECLARE 
+    V_MANV NHANVIEN.MANV%TYPE:='NV0001';
+    V_LUONG NHANVIEN.LUONG%TYPE;
+BEGIN
+    SELECT N.LUONG
+    INTO V_LUONG
+    FROM NHANVIEN N
+    WHERE N.MANV=V_MANV;
+    IF(V_LUONG=1000000) THEN
+        DBMS_OUTPUT.PUT_LINE(N'Luong cua nhan vien '|| V_MANV ||N' la 1000000');
+    ELSE
+        DBMS_OUTPUT.PUT_LINE(N'Luong cua nhan vien  '|| V_MANV ||N' khong la 1000000');
+    END IF;
+END;
+--4. 
+SET SERVEROUTPUT ON;
+DECLARE
+    V_SONV INT;
+    V_MADA DEAN.MADA%TYPE;
+BEGIN
+    V_MADA := '&V_MADA';
+    SELECT COUNT(*) AS SONHANVIEN
+    INTO V_SONV
+    FROM  PHANCONG P
+    WHERE MADA = V_MADA;
+    IF(V_SONV>0) THEN
+        DBMS_OUTPUT.PUT_LINE(V_SONV);
+    ELSE
+        DBMS_OUTPUT.PUT_LINE(N'Khong co');
+    END IF;
+END;
+--5.
+SET SERVEROUTPUT ON;
+DECLARE
+    V_QUANHE THANNHAN.QUANHE%TYPE;
+    V_TENNV NHANVIEN.HOTEN%TYPE:=N'Do Xuan Thuy';
+BEGIN
+    SELECT T.QUANHE
+    INTO V_QUANHE
+    FROM  THANNHAN T,NHANVIEN N
+    WHERE T.MANV=N.MANV AND N.HOTEN=V_TENNV AND T.TENTN=N'Le Thao Nguyen' ;
+    DBMS_OUTPUT.PUT_LINE(V_QUANHE);  
+END;
+SELECT * FROM NHANVIEN;
+select * from thannhan;
+--6.
+SET SERVEROUTPUT ON;
+DECLARE
+    V_MaNV char(6 byte);
+    V_Luong float;
+    Muc_Luong varchar(20);
+    BEGIN
+        V_MaNV := '&V_MaNV';
+        Select Luong into V_Luong
+        from NhanVien
+        where MaNV = V_MaNV;
+        if sql%found then
+        Muc_Luong:= case 
+                        WHEN V_Luong<5000000 then N'Thap'
+                        WHEN V_Luong<8000000 then N'Trung bình'
+                        WHEN V_Luong<12000000 then N'Cao'
+                        ELSE N'Rat cao'
+                    END;
+        DBMS_OUTPUT.PUT_LINE (V_Luong ||N' là muc luong '||Muc_Luong);
+        else
+        DBMS_OUTPUT.PUT_LINE (N'Khong tim thay MaNV');
+        end if;
+END;
+select * from nhanvien
+--7.
+SET SERVEROUTPUT ON;
+Declare 
+var_n number(5);
+var_rows number(5);
+BEGIN
+    var_n := &var_n;
+    UPDATE PhanCong
+    SET ThoiGian = ThoiGian - var_n
+    WHERE MADA='DA03';
+    begin
+        var_rows := SQL%ROWCOUNT;
+        DBMS_OUTPUT.PUT_LINE(N'Co ' || var_rows||N' nhan vien bi lui ngay tham gia');
+        end;
+END;
+--8
+declare
+    cursor C_NV0002 is
+        select MANV,HOTEN,LUONG
+        from NHANVIEN
+        where MAPH='PH02';
+   V_MANV char(6); V_HOTEN nvarchar2(50); V_LUONG float;
+Begin
+    open C_NV0002;
+    fetch C_NV0002 into V_MANV,V_HOTEN,V_LUONG;
+while
+    C_NV0002%found LOOP
+    dbms_output.put_line(V_MANV ||' '||V_HOTEN ||' '||V_LUONG);
+    fetch C_NV0002 into V_MANV,V_HOTEN,V_LUONG;
+    end LOOP;
+    Close C_NV0002;
+end;
+
+
+
+
+
+
+
+
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
